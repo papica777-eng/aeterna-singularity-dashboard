@@ -416,18 +416,18 @@
           <div class="stats-row">
             <div class="stat-box">
               <div class="val" id="val-speed-course">$79 AUD</div>
-              <div class="lbl">Speed Punching</div>
+              <div class="lbl">Course Price</div>
             </div>
             <div class="stat-box">
               <div class="val green" id="val-magnesium">$34 AUD</div>
-              <div class="lbl">Anchialo Gel</div>
+              <div class="lbl">Gel Price</div>
             </div>
             <div class="stat-box">
               <div class="val purple" id="val-private">$120 AUD</div>
-              <div class="lbl">1-on-1 Striking</div>
+              <div class="lbl">1-on-1 Rate</div>
             </div>
             <div class="stat-box">
-              <div class="val orange" id="val-pitches">148</div>
+              <div class="val orange" id="val-pitches">0</div>
               <div class="lbl">Cold Offers Sent</div>
             </div>
           </div>
@@ -435,20 +435,19 @@
           <div style="margin-top: 14px;">
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim);">
               <span>Melbourne Market Saturation (Richmond, CBD, South Yarra, St Kilda)</span>
-              <span id="saturation-pct">74.2%</span>
+              <span id="saturation-pct">0.0%</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill" id="saturation-fill" style="width: 74.2%"></div>
+              <div class="progress-fill" id="saturation-fill" style="width: 0%"></div>
             </div>
           </div>
 
           <div style="margin-top: 18px;">
             <h4 style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px;">ACTIVE TARGETED LEADS IN MELBOURNE</h4>
             <div class="lead-list" id="lead-list">
-              <div class="lead-item"><span class="name">Melbourne Striking Academy</span><span class="price">$120/hr Private</span></div>
-              <div class="lead-item"><span class="name">Richmond Combat & Boxing Club</span><span class="price">Anchialo Protocol</span></div>
-              <div class="lead-item"><span class="name">South Yarra Functional Fitness</span><span class="price">Speed Course $79</span></div>
-              <div class="lead-item"><span class="name">St Kilda BJJ & Striking Lab</span><span class="price">Wholesale Gel Pack</span></div>
+              <div class="lead-item" style="color: var(--text-dim); justify-content: center;">
+                <span>Няма прихванати лийдове все още. Натисни "🎯 Colonize Melbourne" за сканиране.</span>
+              </div>
             </div>
           </div>
         </div>
@@ -520,19 +519,19 @@
           </h3>
           <div class="stats-row">
             <div class="stat-box">
-              <div class="val green" id="reaper-total-profit">$24,580 AUD</div>
+              <div class="val green" id="reaper-total-profit">$0.00 AUD</div>
               <div class="lbl">Total Pipeline Revenue</div>
             </div>
             <div class="stat-box">
-              <div class="val" id="reaper-today-profit">+$1,420 AUD</div>
+              <div class="val" id="reaper-today-profit">+$0.00 AUD</div>
               <div class="lbl">Today's Settlements</div>
             </div>
             <div class="stat-box">
-              <div class="val purple" id="reaper-deals">18</div>
+              <div class="val purple" id="reaper-deals">0</div>
               <div class="lbl">Deals Closed</div>
             </div>
             <div class="stat-box">
-              <div class="val orange" id="reaper-win-rate">88.4%</div>
+              <div class="val orange" id="reaper-win-rate">0.0%</div>
               <div class="lbl">Conversion Rate</div>
             </div>
           </div>
@@ -651,20 +650,26 @@
           document.getElementById('ai-model-tag').textContent = `Gemini: ${data.ai.model}`;
         }
 
-        // Revenue & Leads
+        // Revenue & Leads (Deterministic Zero-Hallucination)
         if (data.revenue) {
-          document.getElementById('val-pitches').textContent = data.revenue.pitchesSent || 148;
-          document.getElementById('reaper-total-profit').textContent = '$' + (data.revenue.totalRevenue || 24580).toLocaleString() + ' AUD';
-          document.getElementById('reaper-deals').textContent = data.revenue.dealsWon || 18;
+          document.getElementById('val-pitches').textContent = data.revenue.pitchesSent ?? 0;
+          const totalRev = Number(data.revenue.totalRevenue ?? 0);
+          document.getElementById('reaper-total-profit').textContent = '$' + totalRev.toFixed(2) + ' AUD';
+          const todayRev = Number(data.revenue.todayRevenue ?? 0);
+          document.getElementById('reaper-today-profit').textContent = '+$' + todayRev.toFixed(2) + ' AUD';
+          document.getElementById('reaper-deals').textContent = data.revenue.dealsWon ?? 0;
+          document.getElementById('reaper-win-rate').textContent = (data.revenue.winRate ?? '0.0') + '%';
 
+          const list = document.getElementById('lead-list');
           if (data.revenue.activeDeals && data.revenue.activeDeals.length > 0) {
-            const list = document.getElementById('lead-list');
             list.innerHTML = data.revenue.activeDeals.map(d => `
               <div class="lead-item">
                 <span class="name">${d.companyName}</span>
                 <span class="price">$${d.value} AUD (${d.probability}% prob)</span>
               </div>
             `).join('');
+          } else {
+            list.innerHTML = '<div class="lead-item" style="color: var(--text-dim); justify-content: center;"><span>Няма прихванати лийдове все още. Натисни "🎯 Colonize Melbourne" за сканиране.</span></div>';
           }
         }
       } catch (err) {
